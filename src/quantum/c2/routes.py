@@ -578,6 +578,30 @@ def register_routes(app, agents, API):
         from quantum.control.phantomdroid import phantomdroid_dashboard_state
         return jsonify(phantomdroid_dashboard_state())
 
+    # ---- real hardware probes: bluetooth / hid / sdr / imsi ----
+    # The /state endpoints for these live further down with the rest of
+    # the hardware block; these are the probe sub-actions.
+    @app.route("/api/bluetooth/scan")
+    def bluetooth_scan():
+        from quantum.control.bluetooth import scan_devices
+        return jsonify(scan_devices())
+
+    @app.route("/api/hid/raw")
+    def hid_raw_devices_route():
+        from quantum.control.hid import hid_raw_devices
+        return jsonify(hid_raw_devices())
+
+    @app.route("/api/sdr/probe")
+    def sdr_probe_route():
+        from quantum.control.sdr import probe_radios
+        return jsonify(probe_radios())
+
+    @app.route("/api/imsi/read", methods=["POST"])
+    def imsi_read_route():
+        from quantum.control.imsi import read_imsi
+        d = request.json or {}
+        return jsonify(read_imsi(d.get("modem", "")))
+
     # ---- OSINT vendors: Intelligence X / ShadowDragon / DarkOwl ----
     @app.route("/api/osint/intelx/state")
     def osint_intelx_state():

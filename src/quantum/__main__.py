@@ -239,6 +239,7 @@ def main(argv=None):
                             "rat", "ransomware", "botnet", "ddos",
                             "messaging", "stego", "apn", "exif",
                             "darkweb", "dorks", "shodan", "map2d", "phantomdroid",
+                            "bluetooth", "hid", "sdr", "imsi",
                             "dohshell", "listener"],
                    help="direct command (optional)")
     p.add_argument("--menu", action="store_true", help="manual console")
@@ -588,6 +589,42 @@ def main(argv=None):
         if a.query == "features":
             print(json.dumps(list_phantomdroid_features(), indent=2, default=str)); return
         print(json.dumps(phantomdroid_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "bluetooth":
+        from quantum.control.bluetooth import (bluetooth_dashboard_state,
+                                               download_bluetooth_drivers,
+                                               scan_devices)
+        if a.query == "scan":
+            print(json.dumps(scan_devices(), indent=2, default=str)); return
+        if a.query == "drivers":
+            print(json.dumps(download_bluetooth_drivers(), indent=2, default=str)); return
+        print(json.dumps(bluetooth_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "hid":
+        from quantum.control.hid import (hid_dashboard_state,
+                                         download_hid_drivers,
+                                         hid_raw_devices)
+        if a.query == "raw":
+            print(json.dumps(hid_raw_devices(), indent=2, default=str)); return
+        if a.query == "drivers":
+            print(json.dumps(download_hid_drivers(), indent=2, default=str)); return
+        print(json.dumps(hid_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "sdr":
+        from quantum.control.sdr import (sdr_dashboard_state,
+                                         download_sdr_drivers,
+                                         probe_radios)
+        if a.query == "probe":
+            print(json.dumps(probe_radios(), indent=2, default=str)); return
+        if a.query == "drivers":
+            print(json.dumps(download_sdr_drivers(), indent=2, default=str)); return
+        print(json.dumps(sdr_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "imsi":
+        from quantum.control.imsi import (imsi_dashboard_state,
+                                          download_imsi_drivers,
+                                          read_imsi)
+        if a.query == "read":
+            print(json.dumps(read_imsi(a.target or ""), indent=2, default=str)); return
+        if a.query == "drivers":
+            print(json.dumps(download_imsi_drivers(), indent=2, default=str)); return
+        print(json.dumps(imsi_dashboard_state(), indent=2, default=str)); return
     elif a.cmd == "dohshell":
         from quantum.c2.reverseshell import (
             generate_doh_reverse_shell_agent,
