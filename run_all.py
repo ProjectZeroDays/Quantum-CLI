@@ -115,10 +115,11 @@ def build_all(exploits_dir: Path, outdir: Path) -> list:
 
         # side artifacts (bytes-exact: no text-mode newline translation)
         if hasattr(mod, "C_STUB"):
-            (outdir / f"{cve}.c").write_bytes(mod.C_STUB.encode())
+            stub_bytes = mod.C_STUB.encode()
+            (outdir / f"{cve}.c").write_bytes(stub_bytes)
             entries.append({"cve": cve, "module": py.name, "status": "ok",
-                            "file": f"{cve}.c", "bytes": len(mod.C_STUB),
-                            "sha256": _sha(mod.C_STUB.encode())})
+                            "file": f"{cve}.c", "bytes": len(stub_bytes),
+                            "sha256": _sha(stub_bytes)})
         if hasattr(mod, "radiotap_wrap"):
             frame = mod.radiotap_wrap(data)
             (outdir / f"{cve}.frame").write_bytes(frame)

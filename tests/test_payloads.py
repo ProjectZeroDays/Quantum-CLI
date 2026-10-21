@@ -113,3 +113,39 @@ def test_zip_bytes_are_platform_and_zlib_independent(stem):
             assert info.create_system == 0, \
                 f"{stem}:{info.filename} host field is {info.create_system} — " \
                 f"ZipInfo defaults to 0 on Windows and 3 on Unix"
+
+
+C_STUB_MODULES = ["cve_2019_2215_bad_binder", "cve_2022_0847_dirtypipe",
+                  "cve_2024_1086_nftables"]
+
+
+@pytest.mark.parametrize("stem", C_STUB_MODULES)
+def test_manifest_byte_count_is_the_encoded_size(stem, tmp_path):
+    """The manifest must record the BYTE size of a C stub, not its
+    character count.
+
+    These stubs contain U+2014 (em dash): one character, three bytes.
+    Recording len(str) made the manifest's "bytes" field disagree with
+    the file actually written, so the release archive did not match
+    payloads.lock.json.
+    """
+    mod = _load(stem)
+    stub = mod.C_STUB
+    assert len(stub) != len(stub.encode()), \
+        f"{stem}: expected the stub to contain a non-ASCII character — " \
+        f"this test would not catch the char/byte mix-up"
+
+    import run_all
+    entries = run_all.build_all(EXPLOITS, tmp_path)
+    run_all.write_manifest(tmp_path, entries)
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    arts = {a["file"]: a for a in manifest["artifacts"] if a.get("file")}
+
+    stub_files = [f for f in arts if f.endswith(".c")]
+    assert stub_files, "no C stub artifacts were produced"
+    for name in stub_files:
+        on_disk = (tmp_path / name).read_bytes()
+        assert arts[name]["bytes"] == len(on_disk), \
+            f"{name}: manifest says {arts[name]['bytes']} bytes, " \
+            f"file is {len(on_disk)}"
+        assert arts[name]["sha256"] == hashlib.sha256(on_disk).hexdigest()
