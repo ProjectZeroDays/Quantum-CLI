@@ -43,7 +43,7 @@ jobs:
       - name: Upload APKs
         uses: softprops/action-gh-release@v1
         with:
-          name: "QUANTUM-CLI v${{ github.ref_name }}"
+          name: "QUANTUM-CLI ${{ github.ref_name }}"
           generate_release_notes: true
           files: |
             release/*.apk
