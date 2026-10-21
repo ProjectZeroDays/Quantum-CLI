@@ -135,6 +135,7 @@ HASH_FORMATS = {
     "sha512_post": {"hash": "sha512", "salt": "post", "hashcat": 1710,
                       "john": "sha512($p.$s)", "example": ""},
     "bitcoin_wallet": {"hashcat": 11300, "john": "bitcoin",
+                        "salt": None,
                         "example": "hash: $bitcoin$..."},
 }
 

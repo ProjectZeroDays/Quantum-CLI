@@ -1,7 +1,7 @@
 {
-  "generated": "2026-10-10T22:51:55",
+  "generated": "2026-10-21T10:05:25",
   "count": 64,
-  "total_bytes": 58471,
+  "total_bytes": 62767,
   "artifacts": [
     {
       "cve": "CHROMECAST_DIAL_LAUNCH",
@@ -192,8 +192,8 @@
       "module": "cve_2022_0847_dirtypipe.py",
       "status": "ok",
       "file": "CVE-2022-0847.c",
-      "bytes": 1091,
-      "sha256": "23f2b930058fbee04372264ffcd9bd280e0d746e6378cbad009ee923f4164bbb"
+      "bytes": 1289,
+      "sha256": "3e9f5c18b575e9963a953d6ca0d4d6d560631beed935c7dec34c1c98e4c70876"
     },
     {
       "cve": "CVE-2022-2588",
@@ -304,8 +304,8 @@
       "module": "cve_2023_42790_webos_aresinstall.py",
       "status": "ok",
       "file": "CVE-2023-42790.ipk",
-      "bytes": 484,
-      "sha256": "bd644905171ad93d61957fc2f8fbca544b90f2677b3cd2312585f8fcb99ea7f3"
+      "bytes": 4577,
+      "sha256": "262758d648c35b904ed51d612b39687072b119a5a875d4f0e0d81a0b2774b988"
     },
     {
       "cve": "CVE-2023-42791",
@@ -392,8 +392,8 @@
       "module": "cve_2024_36210_roku_devmode.py",
       "status": "ok",
       "file": "CVE-2024-36210.zip",
-      "bytes": 307,
-      "sha256": "2742e21f4171709b39277ff25afe775c0e28b0a46c4e19de0ffbe08fbaf0c15b"
+      "bytes": 312,
+      "sha256": "c44868f74c77d9c44ce198d10bd1706f82dad2a7d83ab8cf668aafa376629259"
     },
     {
       "cve": "CVE-2024-36212",

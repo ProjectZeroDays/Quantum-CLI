@@ -2,8 +2,6 @@
 """Bash Bunny v2 / AI-driven duckie script generator.
 Manual GUI buttons + input form to build exploit workflow and generate Ducky script payloads.
 Requires Bash Bunny v2 and Android device with ADB access."""
-import json
-import re
 
 class BashBunnyPayloadGenerator:
     """Generates Ducky scripts from manual GUI input forms."""

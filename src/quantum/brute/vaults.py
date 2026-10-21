@@ -307,8 +307,9 @@ def veracrypt_header_password_check(header, password,
                                        "big")
         == (zlib.crc32(dec[192:448]) & 0xFFFFFFFF),
     }
-    return {
-        "ok": all(checks.values()),
+    ok = all(checks.values())
+    out = {
+        "ok": ok,
         "checks": checks,
         "prf": prf,
         "pim": int(pim or 0),
@@ -319,6 +320,18 @@ def veracrypt_header_password_check(header, password,
         "sector_size": int.from_bytes(dec[64:68], "big"),
         "backend": "embedded (pure-Python PBKDF2 + XTS)",
     }
+    if not ok:
+        # Never return ok=False without saying why — the caller needs to
+        # tell "wrong password" apart from "not a VeraCrypt header".
+        failed = [k for k, v in checks.items() if not v]
+        if "magic" in failed:
+            out["error"] = ("header is not a VeraCrypt volume (magic "
+                            "mismatch) — wrong volume or wrong header "
+                            "block offset")
+        else:
+            out["error"] = ("password check failed: " + ", ".join(failed)
+                            + " did not validate")
+    return out
 
 
 # ------------------------------------------------------------------ TrueCrypt

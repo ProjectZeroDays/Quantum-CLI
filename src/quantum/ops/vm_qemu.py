@@ -7,7 +7,6 @@ for HID attacks (Hak5, O.MG cables, etc.).
 
 import subprocess
 import os
-import sys
 from typing import Optional
 
 class VMQEMU:

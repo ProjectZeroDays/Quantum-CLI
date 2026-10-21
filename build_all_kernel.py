@@ -55,6 +55,9 @@ def main() -> int:
     ap.add_argument("--strict", action="store_true", help="exit 1 on any failure")
     ap.add_argument("--no-generate", action="store_true")
     ap.add_argument("--keep", action="store_true", help="keep the build dir")
+    ap.add_argument("--outdir", default=None,
+                    help="copy the compiled binaries into this directory "
+                         "(CI uses it to upload build artifacts)")
     a = ap.parse_args()
 
     work = Path(tempfile.mkdtemp(prefix="tvkernel_"))
@@ -74,10 +77,21 @@ def main() -> int:
             if rc == 0:
                 print(f"  [+] {c.name}"); ok += 1
             else:
-                first = (err.strip().splitlines() or ["?"])[0][:80] if err else "?"
-                print(f"  [-] {c.name}: {first}"); fail += 1
+                # Show enough of the compiler output to diagnose the
+                # failure — a single line ("In function 'main':") is not
+                # enough to tell what actually went wrong.
+                lines = (err or "").strip().splitlines() or ["?"]
+                detail = " | ".join(l.strip() for l in lines[:3])[:240]
+                print(f"  [-] {c.name}: {detail}"); fail += 1
 
         print(f"[{'PASS' if not fail else 'FAIL'}] {ok} compiled, {fail} failed")
+        if a.outdir:
+            dest = Path(a.outdir)
+            dest.mkdir(parents=True, exist_ok=True)
+            for binary in sorted(out.iterdir()):
+                if binary.is_file():
+                    shutil.copy2(binary, dest / binary.name)
+            print(f"[*] artifacts copied to {dest}")
         if a.keep:
             print(f"[*] artifacts in {out}")
         else:

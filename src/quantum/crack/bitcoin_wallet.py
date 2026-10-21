@@ -21,10 +21,9 @@ import glob
 import os
 import shutil
 import subprocess
-import time
 
 from quantum.core.logging import log
-from quantum.brute.hashes import HASH_FORMATS, detect_hashcat, hashcat_command, hashcat_run
+from quantum.brute.hashes import HASH_FORMATS, hashcat_run
 
 # ------------------------------------------------------------------ install
 

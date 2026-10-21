@@ -1,7 +1,7 @@
 """ADB / Fastboot device control — FRP bypass, data exfil, payload install.
 Real: uses adb binary on system PATH; requires root for FRP wipe.
 Authorized engagements only."""
-import subprocess, time, os, sys
+import subprocess
 
 class ADBController:
     def __init__(self, device_id=None):

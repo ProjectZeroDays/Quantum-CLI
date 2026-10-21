@@ -5,10 +5,8 @@ Provides a unified interface for invoking these tools.
 """
 
 import subprocess
-import json
-import os
 import shutil
-from typing import Optional, Dict, List
+from typing import Dict, List
 
 class SecurityToolIntegration:
     """Integrate with external security tools."""

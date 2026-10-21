@@ -2,7 +2,7 @@
 real subprocess calls, and the `bitcoin_wallet` hash format (mode 11300)
 now registered in `hashes.HASH_FORMATS`. No simulated hits.
 """
-import os, sys, tempfile
+import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), "src"))
 

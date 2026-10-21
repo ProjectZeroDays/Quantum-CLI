@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """HID Payload Generator for Hak5 devices, O.MG cables, Cactus WHID 2, BADUSB.
 Generates DuckyScript from GUI workflow builder."""
-import json
 import base64
 
 class HIDPayloadGenerator:

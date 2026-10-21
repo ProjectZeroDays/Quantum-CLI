@@ -1,2 +1,10 @@
+# Dev/test dependencies.
+# Pulls in the runtime requirements (pycryptodome -> `Crypto`, requests,
+# flask, ...) so a workflow that only installs this file can still collect
+# and run the full test suite.
+-r requirements.txt
+
 pytest>=7
 cryptography>=41
+pytest-cov>=4.0
+ruff>=0.4

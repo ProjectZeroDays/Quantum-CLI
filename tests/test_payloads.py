@@ -91,3 +91,25 @@ def test_zip_entries_pinned_epoch(stem):
         for info in z.infolist():
             assert info.date_time == (1980, 1, 1, 0, 0, 0), \
                 f"{stem}:{info.filename} has wall-clock mtime {info.date_time}"
+
+
+@pytest.mark.parametrize("stem", ZIP_MODULES)
+def test_zip_bytes_are_platform_and_zlib_independent(stem):
+    """The built archive must be byte-identical everywhere.
+
+    Two sources of drift are pinned here:
+      * ZipInfo.create_system defaults to 0 on Windows and 3 on Unix;
+      * DEFLATE output depends on the zlib build (classic zlib vs
+        zlib-ng disagree byte-for-byte on the same input).
+    So the archive is stored (no compressor) and the host field is pinned.
+    """
+    import io, zipfile
+    data = _load(stem).build()
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        for info in z.infolist():
+            assert info.compress_type == zipfile.ZIP_STORED, \
+                f"{stem}:{info.filename} is compressed — deflate output " \
+                f"varies with the zlib build and drifts the manifest"
+            assert info.create_system == 0, \
+                f"{stem}:{info.filename} host field is {info.create_system} — " \
+                f"ZipInfo defaults to 0 on Windows and 3 on Unix"

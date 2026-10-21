@@ -13,7 +13,6 @@ Authorized engagements / lab work only. No simulated output.
 """
 from __future__ import annotations
 
-import time
 from quantum.core.logging import log
 
 # ---------------------------------------------------------------- verified
