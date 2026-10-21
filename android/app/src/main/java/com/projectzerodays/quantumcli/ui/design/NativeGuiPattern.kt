@@ -32,17 +32,17 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
 /* ------------------------------------------------------------------ data */
-sealed class UiState<out T> {
-    object Idle : UiState<Nothing>()
-    object Loading : UiState<Nothing>()
-    data class Success<T>(val data: T) : UiState<T>()
-    data class Error(val message: String) : UiState<Nothing>()
+sealed class UiState {
+    object Idle : UiState()
+    object Loading : UiState()
+    data class Success(val data: String) : UiState()
+    data class Error(val message: String) : UiState()
 }
 
 /* ------------------------------------------------------------------ domain */
 class NativeViewModel(private val repo: OpenFableRepository) : ViewModel() {
-    private val _state = androidx.lifecycle.MutableLiveData<UiState<String>>()
-    val state: androidx.lifecycle.LiveData<UiState<String>> = _state
+    private val _state = androidx.lifecycle.MutableLiveData<UiState>()
+    val state: androidx.lifecycle.LiveData<UiState> = _state
 
     fun loadStatus() {
         viewModelScope.launch {
@@ -163,7 +163,12 @@ fun NativeGuiScreen(viewModel: NativeViewModel = androidx.lifecycle.viewmodel.co
             // Status / server info (responds to real dashboard data)
             when (uiState) {
                 is UiState.Success -> {
-                    val result = (uiState as UiState.Success<String>).data
+                    // UiState is not generic, so the cast is a plain
+                    // downcast to the concrete Success type. A generic
+                    // Success<T> made the Kotlin compiler emit Java with a
+                    // wildcard capture, which javac rejected with
+                    // "CAP#1 cannot be converted to String".
+                    val result = (uiState as UiState.Success).data
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color(0xF20D1E33)),

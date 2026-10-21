@@ -12,6 +12,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import kotlinx.coroutines.runBlocking
 
 /* ------------------------------------------------------------------ model */
 interface HybridBridgeInterface {
@@ -48,11 +49,16 @@ class HybridBridgeImpl(private val ctx: Context, private val repo: OpenFableRepo
     @JavascriptInterface
     override fun openfableState(): String {
         // Real call — not a hardcoded JSON string.
-        return try {
-            val result = repo.getDashboardState()
-            result
-        } catch (e: Exception) {
-            "{\"error\":\"${e.message}\"}"
+        // @JavascriptInterface methods are called on the WebView's JS
+        // thread, which is not a coroutine, so the suspend repository
+        // call has to be bridged with runBlocking.
+        return runBlocking {
+            try {
+                val result = repo.getDashboardState()
+                result
+            } catch (e: Exception) {
+                "{\"error\":\"${e.message}\"}"
+            }
         }
     }
 
@@ -77,11 +83,13 @@ class HybridBridgeImpl(private val ctx: Context, private val repo: OpenFableRepo
 
     @JavascriptInterface
     override fun openfableChat(sessionId: String, text: String, modelId: String?): String {
-        return try {
-            val result = repo.chat(sessionId, text, modelId)
-            result
-        } catch (e: Exception) {
-            "{\"error\":\"${e.message}\"}"
+        return runBlocking {
+            try {
+                val result = repo.chat(sessionId, text, modelId)
+                result
+            } catch (e: Exception) {
+                "{\"error\":\"${e.message}\"}"
+            }
         }
     }
 
