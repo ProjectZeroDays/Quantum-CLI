@@ -55,10 +55,29 @@ Release notes for the v4.6.2 line.
 
 ## Assets
 
-| File | Size | Signature |
+| File | Size | Notes |
 |---|---|---|
-| `quantum-cli-full-4.6.2.apk` | 15.9 MB | V2 signed |
-| `quantum-cli-limited-4.6.2.apk` | 15.9 MB | V2 signed |
+| `quantum-cli-full-4.6.2.apk` | 15.9 MB | V2 signed, root-capable |
+| `quantum-cli-limited-4.6.2.apk` | 15.9 MB | V2 signed, no-root |
+| `app-full-release.apk` | 15.9 MB | V2 signed, root-capable (CI build) |
+| `app-limited-release.apk` | 15.9 MB | V2 signed, no-root (CI build) |
+| `quantum-exploits-v4.6.2.zip` | 213 KB | exploit modules + operator harness |
+| `quantum-payloads-v4.6.2.zip` | 88 KB | 64 built payload artifacts |
+| `payloads.lock.json` | 18 KB | sha256 manifest for every payload |
+| `PLATFORM_INDEX.json` | 21 KB | platform/exploit index |
+
+The two archives are byte-reproducible: every ZIP entry is stored
+(uncompressed), stamped with a fixed epoch and a pinned host field, and the
+manifest's volatile build timestamp is stripped. Rebuilding the same tree
+yields identical archives, and every artifact in
+`quantum-payloads-v4.6.2.zip` matches `payloads.lock.json` by size and
+sha256.
+
+Reproduce with:
+
+```bash
+python package_release.py --version 4.6.2
+```
 
 ## Authorized use only
 
