@@ -157,7 +157,12 @@ def main():
             "repo": "exploit_payloads/" + slug(cve) + "/deploy.py",
         })
     out = ROOT / "PLATFORM_INDEX.json"
-    out.write_text(json.dumps({"count": len(entries), "exploits": entries}, indent=2))
+    # newline="\n" so the index is byte-identical on every platform: the
+    # default text mode writes CRLF on Windows, which would make the
+    # release archives differ between a Windows checkout and a CI one.
+    with open(out, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps({"count": len(entries), "exploits": entries},
+                            indent=2))
     print("wrote", out, len(entries), "entries")
 
 

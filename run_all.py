@@ -138,7 +138,12 @@ def write_manifest(outdir: Path, entries: list) -> Path:
         "non_payload": [e for e in entries if e["status"] != "ok"],
     }
     mj = outdir / "manifest.json"
-    mj.write_text(json.dumps(manifest, indent=2))
+    # newline="\n" so the manifest is byte-identical on every platform:
+    # the default text mode writes CRLF on Windows, which would make the
+    # payload lock and the release archives differ between a Windows
+    # checkout and a CI one.
+    with open(mj, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(json.dumps(manifest, indent=2))
 
     lines = [f"# Payload manifest", "",
              f"Generated: {manifest['generated']}",
@@ -150,7 +155,9 @@ def write_manifest(outdir: Path, entries: list) -> Path:
         lines += ["", "## Non-payload", ""]
         for e in manifest["non_payload"]:
             lines.append(f"- {e['cve']} — {e['status']}" + (f" ({e['error']})" if e.get("error") else ""))
-    (outdir / "manifest.md").write_text("\n".join(lines) + "\n")
+    with open(outdir / "manifest.md", "w", encoding="utf-8",
+              newline="\n") as fh:
+        fh.write("\n".join(lines) + "\n")
     return mj
 
 def verify(outdir: Path) -> int:
