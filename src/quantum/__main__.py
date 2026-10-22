@@ -240,9 +240,21 @@ def main(argv=None):
                             "messaging", "stego", "apn", "exif",
                             "darkweb", "dorks", "shodan", "map2d", "phantomdroid",
                             "bluetooth", "hid", "sdr", "imsi",
+                             # operator modules (quantum.postexploit.*)
+                             "cve", "persistence", "cookiejar", "mitm",
+                             "traffic", "c2proxy", "autoconfig",
+                             "godmode", "vault", "pegasus", "otp",
+                             "pivot", "mobile", "biometric", "wallet",
+                             "logclean", "adbx", "advanced",
                             "dohshell", "listener"],
                    help="direct command (optional)")
     p.add_argument("--menu", action="store_true", help="manual console")
+    p.add_argument("--port", type=int, default=8080,
+                   help="port for the operator modules (mitm proxy, "
+                        "c2 proxy chain, load test)")
+    p.add_argument("--mode", default="capture",
+                   help="mode for the operator modules (traffic capture, "
+                        "log clean, vault mount)")
     p.add_argument("--scope", "-c", dest="cidr", help="autonomous/scan scope CIDR")
     p.add_argument("--target", "-t", help="external target CIDR/IP — run camera war on it "
                                           "AUTONOMOUSLY by default (add --manual for manual)")
@@ -625,6 +637,108 @@ def main(argv=None):
         if a.query == "drivers":
             print(json.dumps(download_imsi_drivers(), indent=2, default=str)); return
         print(json.dumps(imsi_dashboard_state(), indent=2, default=str)); return
+    # ---- operator modules (quantum.postexploit.*) ------------------------
+    elif a.cmd == "cve":
+        from quantum.postexploit.cve_update import cve_update_state, check_updates
+        if a.query == "check":
+            print(json.dumps(check_updates(force=bool(a.force)), indent=2, default=str)); return
+        print(json.dumps(cve_update_state(), indent=2, default=str)); return
+    elif a.cmd == "persistence":
+        from quantum.postexploit.persistence_checker import (check_persistence,
+                                                             persistence_dashboard_state)
+        if a.query == "scan":
+            print(json.dumps(check_persistence(), indent=2, default=str)); return
+        print(json.dumps(persistence_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "cookiejar":
+        from quantum.postexploit.cookie_manager import (cookie_manager_state,
+                                                        find_cookie_stores,
+                                                        read_cookie_store)
+        if a.query == "stores":
+            print(json.dumps({"stores": find_cookie_stores()}, indent=2, default=str)); return
+        if a.query == "read":
+            print(json.dumps(read_cookie_store(a.target or ""), indent=2, default=str)); return
+        print(json.dumps(cookie_manager_state(), indent=2, default=str)); return
+    elif a.cmd == "mitm":
+        from quantum.postexploit.mitm_dashboard import (mitm_dashboard_state,
+                                                         mitm_config)
+        if a.query == "config":
+            print(json.dumps(mitm_config(proxy_port=int(a.port or 8080)), indent=2, default=str)); return
+        print(json.dumps(mitm_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "traffic":
+        from quantum.postexploit.traffic_analysis import (traffic_dashboard_state,
+                                                          traffic_config)
+        if a.query == "config":
+            print(json.dumps(traffic_config(mode=a.mode or "capture"), indent=2, default=str)); return
+        print(json.dumps(traffic_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "c2proxy":
+        from quantum.postexploit.c2_proxy import (c2_proxy_dashboard_state,
+                                                 configure_proxy_chain,
+                                                 reverse_dns_c2)
+        if a.query == "chain":
+            print(json.dumps(configure_proxy_chain(), indent=2, default=str)); return
+        if a.query == "rdns":
+            print(json.dumps(reverse_dns_c2(a.target or "c2.quantum.local"), indent=2, default=str)); return
+        print(json.dumps(c2_proxy_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "autoconfig":
+        from quantum.postexploit.auto_config import (auto_config_dashboard_state,
+                                                      apply_defaults)
+        if a.query == "defaults":
+            print(json.dumps(apply_defaults(a.target or "all"), indent=2, default=str)); return
+        print(json.dumps(auto_config_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "godmode":
+        from quantum.postexploit.god_mode import god_mode_config
+        print(json.dumps(god_mode_config(), indent=2, default=str)); return
+    elif a.cmd == "vault":
+        from quantum.postexploit.vault_share import (vault_dashboard_state,
+                                                     vault_mount)
+        if a.query == "mount":
+            print(json.dumps(vault_mount(a.target or None), indent=2, default=str)); return
+        print(json.dumps(vault_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "pegasus":
+        from quantum.postexploit.nso_pegasus_ios import nso_pegasus_dashboard_state
+        print(json.dumps(nso_pegasus_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "otp":
+        from quantum.postexploit.otp_bypass import (intercept_sms_state,
+                                                    set_sms_forwarding)
+        if a.query == "forward":
+            print(json.dumps(set_sms_forwarding(a.target or ""), indent=2, default=str)); return
+        print(json.dumps(intercept_sms_state(), indent=2, default=str)); return
+    elif a.cmd == "pivot":
+        from quantum.postexploit.pivot_lateral import (pivot_dashboard_state,
+                                                       pivot_scan)
+        if a.query == "scan":
+            print(json.dumps(pivot_scan(), indent=2, default=str)); return
+        print(json.dumps(pivot_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "mobile":
+        from quantum.postexploit.mobile_verification import mobile_verification_state
+        print(json.dumps(mobile_verification_state(), indent=2, default=str)); return
+    elif a.cmd == "biometric":
+        from quantum.postexploit.biometric_clone import (biometric_dashboard_state,
+                                                        find_biometric_artifacts)
+        if a.query == "artifacts":
+            print(json.dumps(find_biometric_artifacts(), indent=2, default=str)); return
+        print(json.dumps(biometric_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "wallet":
+        from quantum.postexploit.cryptowallet import (crypto_dashboard_state,
+                                                      search_crypto_artifacts)
+        if a.query == "search":
+            print(json.dumps(search_crypto_artifacts([a.target or "."]), indent=2, default=str)); return
+        print(json.dumps(crypto_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "logclean":
+        from quantum.postexploit.log_cleaner import (find_target_logs,
+                                                     log_cleaner_dashboard_state)
+        if a.query == "find":
+            print(json.dumps({"logs": find_target_logs()}, indent=2, default=str)); return
+        print(json.dumps(log_cleaner_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "adbx":
+        from quantum.postexploit.adb_exploit import (adb_dashboard_state,
+                                                     adb_devices)
+        if a.query == "devices":
+            print(json.dumps(adb_devices(), indent=2, default=str)); return
+        print(json.dumps(adb_dashboard_state(), indent=2, default=str)); return
+    elif a.cmd == "advanced":
+        from quantum.postexploit.advanced_config_aggregator import advanced_config_state
+        print(json.dumps(advanced_config_state(), indent=2, default=str)); return
     elif a.cmd == "dohshell":
         from quantum.c2.reverseshell import (
             generate_doh_reverse_shell_agent,
