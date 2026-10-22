@@ -38,12 +38,22 @@ jobs:
           ./gradlew --no-daemon assembleLimitedRelease
       - name: Collect APK artifacts
         run: |
-          mkdir -p release
-          find android/app/build/outputs/apk -name "*.apk" -exec cp {} release/ \;
+          # Name the APKs for the version being released. The repo's
+          # release/ tree holds one directory per version, so a plain
+          # release/*.apk glob would also pick up the APKs committed
+          # for an older release.
+          set -e
+          ver="${GITHUB_REF_NAME#v}"                       # 4.6.3
+          mkdir -p "release/${GITHUB_REF_NAME}"             # release/v4.6.3
+          cp android/app/build/outputs/apk/full/release/app-full-release.apk \
+             "release/${GITHUB_REF_NAME}/quantum-cli-full-$ver.apk"
+          cp android/app/build/outputs/apk/limited/release/app-limited-release.apk \
+             "release/${GITHUB_REF_NAME}/quantum-cli-limited-$ver.apk"
+          ls -la "release/${GITHUB_REF_NAME}"
       - name: Upload APKs
         uses: softprops/action-gh-release@v1
         with:
           name: "QUANTUM-CLI ${{ github.ref_name }}"
           generate_release_notes: true
           files: |
-            release/*.apk
+            release/${{ github.ref_name }}/*.apk
