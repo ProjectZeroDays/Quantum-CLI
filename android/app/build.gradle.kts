@@ -27,8 +27,8 @@ android {
         applicationId = "com.projectzerodays.quantumcli"
         minSdk = 26
         targetSdk = 34
-        versionCode = 4
-        versionName = "4.6.2"
+        versionCode = 5
+        versionName = "4.6.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
