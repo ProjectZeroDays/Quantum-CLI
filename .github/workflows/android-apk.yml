@@ -36,7 +36,21 @@ jobs:
         run: |
           cd android
           ./gradlew --no-daemon assembleLimitedRelease
-      - name: Collect APK artifacts
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build the release archives
+        # The exploit and payload archives are built here so the GitHub
+        # release always carries the full asset set. package_release.py
+        # produces byte-reproducible archives.
+        run: |
+          set -e
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          ver="${GITHUB_REF_NAME#v}"
+          python package_release.py --version "$ver"
+      - name: Collect release assets
         run: |
           # Name the APKs for the version being released. The repo's
           # release/ tree holds one directory per version, so a plain
@@ -49,11 +63,13 @@ jobs:
              "release/${GITHUB_REF_NAME}/quantum-cli-full-$ver.apk"
           cp android/app/build/outputs/apk/limited/release/app-limited-release.apk \
              "release/${GITHUB_REF_NAME}/quantum-cli-limited-$ver.apk"
+          cp payloads.lock.json PLATFORM_INDEX.json \
+             "release/${GITHUB_REF_NAME}/"
           ls -la "release/${GITHUB_REF_NAME}"
-      - name: Upload APKs
+      - name: Upload release assets
         uses: softprops/action-gh-release@v1
         with:
           name: "QUANTUM-CLI ${{ github.ref_name }}"
           generate_release_notes: true
           files: |
-            release/${{ github.ref_name }}/*.apk
+            release/${{ github.ref_name }}/*
