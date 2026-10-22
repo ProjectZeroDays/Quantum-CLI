@@ -127,23 +127,37 @@ def collect_harness() -> list:
 def collect_payload_artifacts(dist: Path) -> list:
     """[(arcname, bytes)] for the built payload artifacts (flat).
 
-    manifest.json carries a "generated" build timestamp, which would make
-    every rebuild produce a different archive. The timestamp is build
-    metadata, not artifact metadata (each artifact is covered by its own
-    sha256 inside the manifest), so it is stripped for a reproducible
+    The artifact list comes from the manifest, not from a directory
+    scan: dist/ also holds the archived single-file spec and whatever
+    else a build left behind, and none of that belongs in the release
     archive.
+
+    manifest.json carries a "generated" build timestamp, which would
+    make every rebuild produce a different archive. The timestamp is
+    build metadata, not artifact metadata (each artifact is covered by
+    its own sha256 inside the manifest), so it is stripped for a
+    reproducible archive.
     """
     entries = []
-    for p in sorted(dist.iterdir()):
-        if not p.is_file() or p.name == "manifest.md":
+    manifest = json.loads((dist / "manifest.json").read_text(encoding="utf-8"))
+    for artifact in manifest.get("artifacts", []):
+        name = artifact.get("file")
+        if not name or not artifact.get("sha256"):
             continue
-        if p.name == "manifest.json":
-            data = json.loads(p.read_text(encoding="utf-8"))
-            data.pop("generated", None)
-            entries.append((p.name,
-                            (json.dumps(data, indent=2) + "\n").encode("utf-8")))
-            continue
-        entries.append((p.name, p.read_bytes()))
+        path = dist / name
+        if not path.is_file():
+            raise SystemExit("[!] manifest lists %s but it is not in %s"
+                             % (name, dist))
+        data = path.read_bytes()
+        if hashlib.sha256(data).hexdigest() != artifact["sha256"]:
+            raise SystemExit("[!] %s does not match the manifest hash" % name)
+        entries.append((name, data))
+
+    # the manifest itself, with the volatile build timestamp removed
+    data = json.loads((dist / "manifest.json").read_text(encoding="utf-8"))
+    data.pop("generated", None)
+    entries.append(("manifest.json",
+                    (json.dumps(data, indent=2) + "\n").encode("utf-8")))
     return entries
 
 
