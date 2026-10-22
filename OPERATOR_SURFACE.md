@@ -66,7 +66,32 @@ actually import. 19 of 21 import here.
   `/api/{crypto,biometric,otp,logclean,adb,pivot,ddos,c2proxy,
   autoconfig,god_mode,darkweb,vault,nso_pegasus,mitm,rat,cve,mobile,
   cookie,traffic,persistence,advanced}` plus the hardware probes.
-- **CLI**: `bluetooth`, `hid`, `sdr`, `imsi`.
+- **CLI**: 18 operator commands plus the 4 hardware probes.
+
+  | Command | Module | Sub-queries |
+  |---|---|---|
+  | `cve` | `cve_update` | `check` |
+  | `persistence` | `persistence_checker` | `scan` |
+  | `cookiejar` | `cookie_manager` | `stores`, `read` |
+  | `mitm` | `mitm_dashboard` | `config` |
+  | `traffic` | `traffic_analysis` | `config` |
+  | `c2proxy` | `c2_proxy` | `chain`, `rdns` |
+  | `autoconfig` | `auto_config` | `defaults` |
+  | `godmode` | `god_mode` | — |
+  | `vault` | `vault_share` | `mount` |
+  | `pegasus` | `nso_pegasus_ios` | — |
+  | `otp` | `otp_bypass` | `forward` |
+  | `pivot` | `pivot_lateral` | `scan` |
+  | `mobile` | `mobile_verification` | — |
+  | `biometric` | `biometric_clone` | `artifacts` |
+  | `wallet` | `cryptowallet` | `search` |
+  | `logclean` | `log_cleaner` | `find` |
+  | `adbx` | `adb_exploit` | `devices` |
+  | `advanced` | `advanced_config_aggregator` | — |
+  | `bluetooth` `hid` `sdr` `imsi` | `quantum.control.*` | `scan`, `raw`, `probe`, `read`, `drivers` |
+
+  New arguments: `--port` (mitm proxy, c2 chain, load test) and
+  `--mode` (traffic capture, log clean, vault mount).
 
 ## Safety rules now enforced by tests
 
@@ -86,7 +111,7 @@ actually import. 19 of 21 import here.
 
 | Check | Result |
 |---|---|
-| `pytest tests/` | 652 passed, 6 skipped, 0 failed |
+| `pytest tests/` | 667 passed, 10 skipped, 0 failed |
 | ruff gate (`E9,F63,F7,F82,F401,F811`) | clean on the committed tree |
 | payload manifest vs `payloads.lock.json` | 64/64 verified |
 | GitHub CI | 9/9 jobs green (lint, 6× test matrix, build-and-verify, compile-gate) |
